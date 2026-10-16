@@ -6,14 +6,14 @@ public enum ProductCategory
     Ghosts,
     Bats,
     Cryptids,
-    PastelGoths
+    Clowns,
+    Patchwork
 }
 
 public static class ProductCategoryExtensions
 {
     public static string ToDisplayName(this ProductCategory category) => category switch
     {
-        ProductCategory.PastelGoths => "Pastel Goths",
         _ => category.ToString()
     };
 
@@ -22,7 +22,8 @@ public static class ProductCategoryExtensions
         ProductCategory.Ghosts => "👻",
         ProductCategory.Bats => "🦇",
         ProductCategory.Cryptids => "🐉",
-        ProductCategory.PastelGoths => "🪦",
+        ProductCategory.Clowns => "🤡",
+        ProductCategory.Patchwork => "🧵",
         _ => "✨"
     };
 }
