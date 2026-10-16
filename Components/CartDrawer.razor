@@ -1,0 +1,123 @@
+@implements IDisposable
+@inject ICartService Cart
+@inject UiState Ui
+
+<div class="fixed inset-0 z-50 @(Ui.IsCartOpen ? "" : "pointer-events-none")">
+    <div class="absolute inset-0 bg-plum-950/70 backdrop-blur-sm transition-opacity duration-300 @(Ui.IsCartOpen ? "opacity-100" : "opacity-0")"
+         @onclick="Ui.CloseCart"></div>
+
+    <aside role="dialog"
+           aria-modal="true"
+           aria-label="Shopping cart"
+           inert="@(!Ui.IsCartOpen)"
+           class="absolute right-0 top-0 flex h-full w-full max-w-md flex-col border-l border-white/10 bg-plum-800 shadow-2xl transition-transform duration-300 ease-out @(Ui.IsCartOpen ? "translate-x-0" : "translate-x-full")">
+
+        <div class="flex items-center justify-between border-b border-white/10 px-6 py-5">
+            <h2 class="font-display text-2xl font-semibold text-lavender-100">
+                Your coven <span class="text-base font-normal text-lavender-300">(@Cart.State.TotalItemCount)</span>
+            </h2>
+            <button type="button"
+                    @onclick="Ui.CloseCart"
+                    aria-label="Close cart"
+                    class="grid h-10 w-10 place-items-center rounded-full bg-plum-700 text-lavender-200 transition hover:bg-plum-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blush-300">
+                ✕
+            </button>
+        </div>
+
+        @if (Cart.State.IsEmpty)
+        {
+            <div class="flex flex-1 flex-col items-center justify-center gap-3 px-8 text-center">
+                <p class="text-6xl" aria-hidden="true">👻</p>
+                <p class="font-display text-xl text-lavender-100">It's awfully quiet in here</p>
+                <p class="text-sm text-lavender-300">Your cart is empty. Adopt a plushie and it will haunt this space.</p>
+                <button type="button"
+                        @onclick="Ui.CloseCart"
+                        class="mt-3 rounded-full bg-blush-400 px-6 py-3 text-sm font-extrabold text-plum-950 shadow-glow transition hover:bg-blush-300">
+                    Keep browsing
+                </button>
+            </div>
+        }
+        else
+        {
+            <ul class="flex-1 space-y-4 overflow-y-auto px-6 py-5">
+                @foreach (var item in Cart.State.Items)
+                {
+                    <li @key="item.Product.Id" class="flex gap-4 rounded-2xl bg-plum-700/60 p-3">
+                        <img src="@item.Product.ImageUrl" alt="" class="h-20 w-20 flex-none rounded-xl object-cover" />
+
+                        <div class="flex min-w-0 flex-1 flex-col">
+                            <div class="flex items-start justify-between gap-2">
+                                <p class="font-display text-base font-semibold leading-snug text-lavender-100">@item.Product.Name</p>
+                                <button type="button"
+                                        @onclick="() => Cart.RemoveAsync(item.Product.Id)"
+                                        aria-label="Remove @item.Product.Name from cart"
+                                        class="flex-none rounded-full p-1 text-lavender-300 transition hover:text-blush-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-blush-300">
+                                    🗑️
+                                </button>
+                            </div>
+                            <p class="text-xs text-lavender-300">@item.Product.Price.ToMoney() each</p>
+
+                            <div class="mt-auto flex items-center justify-between pt-2">
+                                <div class="flex items-center gap-1 rounded-full bg-plum-900 p-1">
+                                    <button type="button"
+                                            @onclick="() => Cart.DecrementAsync(item.Product.Id)"
+                                            aria-label="Decrease quantity of @item.Product.Name"
+                                            class="grid h-7 w-7 place-items-center rounded-full bg-plum-700 font-extrabold text-lavender-100 transition hover:bg-blush-400 hover:text-plum-950">
+                                        −
+                                    </button>
+                                    <span class="min-w-8 text-center text-sm font-extrabold" aria-live="polite">@item.Quantity</span>
+                                    <button type="button"
+                                            @onclick="() => Cart.IncrementAsync(item.Product.Id)"
+                                            disabled="@(item.Quantity >= item.Product.StockQuantity)"
+                                            aria-label="Increase quantity of @item.Product.Name"
+                                            class="grid h-7 w-7 place-items-center rounded-full bg-plum-700 font-extrabold text-lavender-100 transition hover:bg-mint-300 hover:text-plum-950 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-plum-700 disabled:hover:text-lavender-100">
+                                        +
+                                    </button>
+                                </div>
+                                <p class="font-display text-lg font-semibold text-mint-300">@item.TotalPrice.ToMoney()</p>
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+
+            <div class="space-y-4 border-t border-white/10 bg-plum-900/60 px-6 py-5">
+                <div class="flex items-center justify-between text-sm text-lavender-300">
+                    <span>Shipping</span>
+                    <span class="font-bold text-mint-300">Free (ghosts fly)</span>
+                </div>
+                <div class="flex items-end justify-between">
+                    <span class="text-lavender-200">Grand total</span>
+                    <span class="font-display text-3xl font-semibold text-lavender-100">@Cart.State.GrandTotal.ToMoney()</span>
+                </div>
+
+                <button type="button"
+                        @onclick="Ui.OpenCheckout"
+                        class="w-full rounded-full bg-blush-400 py-3 text-base font-extrabold text-plum-950 shadow-glow transition hover:bg-blush-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-mint-300">
+                    Checkout
+                </button>
+                <button type="button"
+                        @onclick="Cart.ClearAsync"
+                        class="w-full text-center text-sm font-bold text-lavender-300 underline-offset-4 transition hover:text-blush-300 hover:underline">
+                    Clear cart
+                </button>
+            </div>
+        }
+    </aside>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Cart.OnChange += Refresh;
+        Ui.OnChange += Refresh;
+    }
+
+    private void Refresh() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Cart.OnChange -= Refresh;
+        Ui.OnChange -= Refresh;
+    }
+}

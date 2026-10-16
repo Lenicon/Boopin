@@ -1,0 +1,12 @@
+{
+  "name": "boopin",
+  "private": true,
+  "description": "Optional Tailwind CLI build for Boopin. Not needed to run the app with the CDN setup.",
+  "scripts": {
+    "css:build": "tailwindcss -c tailwind.config.js -i Styles/tailwind.css -o wwwroot/css/tailwind.css --minify",
+    "css:watch": "tailwindcss -c tailwind.config.js -i Styles/tailwind.css -o wwwroot/css/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

@@ -1,0 +1,168 @@
+@page "/"
+@inject IProductService Products
+@inject UiState Ui
+
+<PageTitle>Boopin · Spooky-cute plushies</PageTitle>
+
+@* ───────── Hero ───────── *@
+<section class="relative overflow-hidden">
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div class="absolute -left-24 top-10 h-72 w-72 rounded-full bg-blush-400/20 blur-3xl"></div>
+        <div class="absolute right-0 top-40 h-80 w-80 rounded-full bg-lavender-400/20 blur-3xl"></div>
+        <span class="absolute left-[8%] top-24 text-2xl opacity-60">✨</span>
+        <span class="absolute right-[12%] top-16 text-xl opacity-60">🌙</span>
+        <span class="absolute bottom-16 left-[45%] text-xl opacity-50">✨</span>
+    </div>
+
+    <div class="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
+        <div>
+            <p class="inline-flex items-center gap-2 rounded-full bg-mint-300/15 px-4 py-1.5 text-sm font-bold text-mint-300">
+                <span aria-hidden="true">🎃</span> Halloween Week is here
+            </p>
+            <h1 class="mt-5 font-display text-5xl font-semibold leading-tight text-lavender-100 sm:text-6xl">
+                Plushies that are
+                <span class="text-blush-300">spooky</span> &amp;
+                <span class="text-mint-300">cute</span>.
+            </h1>
+            <p class="mt-5 max-w-lg text-lg leading-relaxed text-lavender-200">
+                Pastel ghosts, sleepy bats and shy little cryptids, all squishy enough to hug and
+                strange enough to keep your shelf interesting.
+            </p>
+
+            <div class="mt-8 flex flex-wrap gap-3">
+                <a href="/#shop"
+                   class="rounded-full bg-blush-400 px-7 py-3 font-extrabold text-plum-950 shadow-glow transition hover:bg-blush-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-mint-300">
+                    Shop plushies
+                </a>
+                <button type="button"
+                        @onclick="Ui.OpenCart"
+                        class="rounded-full border border-lavender-300/40 px-7 py-3 font-extrabold text-lavender-100 transition hover:border-mint-300 hover:text-mint-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-mint-300">
+                    View cart
+                </button>
+            </div>
+
+            <ul class="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm font-bold text-lavender-300">
+                <li>☁️ Extra-soft fill</li>
+                <li>🚚 Free spooky shipping</li>
+                <li>⭐ Rated 4.5+ by cuddlers</li>
+            </ul>
+        </div>
+
+        <div class="relative mx-auto h-80 w-full max-w-md sm:h-96" aria-hidden="true">
+            @for (var i = 0; i < Math.Min(3, _featured.Count); i++)
+            {
+                var product = _featured[i];
+                var style = i switch
+                {
+                    0 => "left-0 top-6 w-48 -rotate-6 sm:w-56",
+                    1 => "right-0 top-0 w-48 rotate-6 sm:w-56",
+                    _ => "left-1/4 bottom-0 w-44 -rotate-2 sm:w-52"
+                };
+                <div @key="product.Id" class="absolute @style animate-float overflow-hidden rounded-3xl border-4 border-plum-800 shadow-soft" style="animation-delay:@(i * 800)ms">
+                    <img src="@product.ImageUrl" alt="" class="aspect-square w-full object-cover" />
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@* ───────── Featured ───────── *@
+<section id="featured" class="mx-auto max-w-6xl scroll-mt-24 px-4 py-14 sm:px-6">
+    <div class="mb-8 flex items-end justify-between gap-4">
+        <div>
+            <p class="text-sm font-extrabold uppercase tracking-widest text-blush-300">Coven favourites</p>
+            <h2 class="font-display text-3xl font-semibold text-lavender-100 sm:text-4xl">Featured plushies</h2>
+        </div>
+    </div>
+
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        @foreach (var product in _featured)
+        {
+            <ProductCard @key="product.Id" Product="product" />
+        }
+    </div>
+</section>
+
+@* ───────── Promo banner ───────── *@
+<section class="mx-auto max-w-6xl px-4 py-6 sm:px-6" aria-label="Promotion">
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blush-400 via-blush-300 to-lavender-300 p-8 text-plum-950 shadow-glow sm:p-12">
+        <span class="pointer-events-none absolute -right-4 -top-6 text-9xl opacity-20" aria-hidden="true">🦇</span>
+        <div class="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+            <div>
+                <p class="text-sm font-extrabold uppercase tracking-widest">Halloween Week</p>
+                <h2 class="mt-1 font-display text-3xl font-semibold sm:text-4xl">Free spooky shipping on every parcel</h2>
+                <p class="mt-2 max-w-xl font-semibold text-plum-800">Adopt one friend or the whole graveyard. Delivery costs nothing, all week long.</p>
+            </div>
+            <a href="/#shop"
+               class="flex-none rounded-full bg-plum-950 px-7 py-3 font-extrabold text-lavender-100 transition hover:bg-plum-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-plum-950 focus-visible:ring-offset-2 focus-visible:ring-offset-blush-300">
+                Adopt a friend
+            </a>
+        </div>
+    </div>
+</section>
+
+@* ───────── Shop ───────── *@
+<section id="shop" class="mx-auto max-w-6xl scroll-mt-24 px-4 py-14 sm:px-6">
+    <div class="mb-6">
+        <p class="text-sm font-extrabold uppercase tracking-widest text-mint-300">The whole graveyard</p>
+        <h2 class="font-display text-3xl font-semibold text-lavender-100 sm:text-4xl">Shop all plushies</h2>
+    </div>
+
+    <div class="mb-8 flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+        <button type="button"
+                @onclick="() => _selected = null"
+                aria-pressed="@(_selected is null ? "true" : "false")"
+                class="@ChipClass(_selected is null)">
+            ✨ All <span class="opacity-70">(@_all.Count)</span>
+        </button>
+
+        @foreach (var category in Enum.GetValues<ProductCategory>())
+        {
+            var current = category;
+            var active = _selected == current;
+            <button type="button"
+                    @key="current"
+                    @onclick="() => _selected = current"
+                    aria-pressed="@(active ? "true" : "false")"
+                    class="@ChipClass(active)">
+                @current.ToEmoji() @current.ToDisplayName()
+                <span class="opacity-70">(@_all.Count(p => p.Category == current))</span>
+            </button>
+        }
+    </div>
+
+    @if (!Visible.Any())
+    {
+        <p class="rounded-2xl bg-plum-800/60 p-8 text-center text-lavender-300">No plushies lurking in this category yet.</p>
+    }
+    else
+    {
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach (var product in Visible)
+            {
+                <ProductCard @key="product.Id" Product="product" />
+            }
+        </div>
+    }
+</section>
+
+@code {
+    private IReadOnlyList<Product> _all = Array.Empty<Product>();
+    private IReadOnlyList<Product> _featured = Array.Empty<Product>();
+    private ProductCategory? _selected;
+
+    private IEnumerable<Product> Visible =>
+        _selected is null ? _all : _all.Where(p => p.Category == _selected);
+
+    protected override async Task OnInitializedAsync()
+    {
+        _all = await Products.GetAllAsync();
+        _featured = await Products.GetFeaturedAsync();
+    }
+
+    private static string ChipClass(bool active) =>
+        "rounded-full px-5 py-2 text-sm font-extrabold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-mint-300 " +
+        (active
+            ? "bg-blush-400 text-plum-950 shadow-glow"
+            : "bg-plum-700 text-lavender-200 hover:bg-plum-600");
+}

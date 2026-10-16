@@ -1,0 +1,66 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject ICartService Cart
+@inject UiState Ui
+
+<div class="flex min-h-screen flex-col">
+    <header class="sticky top-0 z-40 border-b border-white/10 bg-plum-950/80 backdrop-blur-md">
+        <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+            <a href="/" class="flex items-center gap-2 font-display text-2xl font-semibold text-lavender-100">
+                <span class="grid h-10 w-10 place-items-center rounded-2xl bg-blush-300 text-xl shadow-glow" aria-hidden="true">👻</span>
+                Boopin
+            </a>
+
+            <nav class="hidden items-center gap-8 text-sm font-bold text-lavender-200 sm:flex" aria-label="Main">
+                <a href="/#featured" class="transition hover:text-blush-300">Featured</a>
+                <a href="/#shop" class="transition hover:text-blush-300">Shop</a>
+            </nav>
+
+            <button type="button"
+                    @onclick="Ui.OpenCart"
+                    aria-label="Open cart, @Cart.State.TotalItemCount items"
+                    class="relative flex items-center gap-2 rounded-full bg-plum-700 px-4 py-2 text-sm font-bold text-lavender-100 transition hover:bg-plum-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blush-300">
+                <span aria-hidden="true">🛒</span>
+                <span>Cart</span>
+                @if (Cart.State.TotalItemCount > 0)
+                {
+                    <span class="absolute -right-1.5 -top-1.5 grid h-6 min-w-6 place-items-center rounded-full bg-blush-400 px-1.5 text-xs font-extrabold text-plum-950 shadow-glow">
+                        @Cart.State.TotalItemCount
+                    </span>
+                }
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1">
+        @Body
+    </main>
+
+    <footer class="border-t border-white/10 bg-plum-950/60">
+        <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-center text-sm text-lavender-300 sm:flex-row sm:px-6 sm:text-left">
+            <p class="font-display text-lg text-lavender-100">Boopin <span aria-hidden="true">🦇</span></p>
+            <p>Demo storefront. No payments are taken and nothing is actually shipped.</p>
+        </div>
+    </footer>
+</div>
+
+<CartDrawer />
+<CheckoutModal />
+<ToastHost />
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        Cart.OnChange += Refresh;
+        Ui.OnChange += Refresh;
+        await Cart.InitializeAsync();
+    }
+
+    private void Refresh() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Cart.OnChange -= Refresh;
+        Ui.OnChange -= Refresh;
+    }
+}

@@ -1,0 +1,13 @@
+# .NET build outputs
+bin/
+obj/
+
+# Visual Studio / VS Code user settings
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.sln.docstates
+
+# Publish output
+appsettings.Development.json

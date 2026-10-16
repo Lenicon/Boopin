@@ -1,0 +1,95 @@
+/* Small, hand-written styles that Tailwind utilities don't cover. */
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(255, 143, 191, 0.12), transparent 60%),
+        radial-gradient(900px 600px at 100% 10%, rgba(176, 149, 245, 0.16), transparent 60%),
+        #1e1230;
+}
+
+::selection {
+    background: #ffb3d4;
+    color: #150d1f;
+}
+
+/* Pastel scrollbars */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #4d3175 transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Loading splash shown before Blazor boots */
+.loading-splash {
+    min-height: 100vh;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 0.75rem;
+    color: #e0d2ff;
+    font-family: 'Fredoka', system-ui, sans-serif;
+}
+
+.loading-ghost {
+    font-size: 4rem;
+    animation: splash-bob 1.4s ease-in-out infinite;
+}
+
+@keyframes splash-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+}
+
+/* Form validation (Blazor adds .valid/.invalid/.modified classes) */
+.valid.modified:not([type=checkbox]) {
+    border-color: #7fdcb9 !important;
+}
+
+.invalid {
+    border-color: #ff6aa8 !important;
+}
+
+.validation-message {
+    color: #ffb3d4;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+/* Blazor's unhandled-error banner */
+#blazor-error-ui {
+    background: #ffd3e6;
+    color: #150d1f;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+    font-weight: 700;
+}
+
+#blazor-error-ui .reload {
+    margin-left: 0.75rem;
+    text-decoration: underline;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
