@@ -1,0 +1,195 @@
+@page "/checkout"
+@implements IDisposable
+@inject ICartService Cart
+@inject NavigationManager Navigation
+
+<PageTitle>Checkout · Boopin</PageTitle>
+
+<div class="mx-auto max-w-3xl px-4 py-14 sm:px-6">
+    @if (_success)
+    {
+        <div class="rounded-3xl border border-white/10 bg-plum-800 px-6 py-14 text-center shadow-2xl sm:px-12">
+            <p class="text-7xl" aria-hidden="true">👻</p>
+            <h1 class="mt-5 font-display text-3xl font-semibold text-lavender-100 sm:text-4xl">
+                Your spooky parcel is being prepared!
+            </h1>
+            <p class="mx-auto mt-3 max-w-md text-lavender-200">
+                Thank you, @_customerName. Our ghouls are tucking @_orderCount @(_orderCount == 1 ? "plushie" : "plushies") into a tiny coffin box.
+            </p>
+
+            <div class="mx-auto mt-8 max-w-sm space-y-2 rounded-2xl bg-plum-700/60 p-5 text-left text-sm">
+                <div class="flex justify-between">
+                    <span class="text-lavender-300">Order number</span>
+                    <span class="font-extrabold text-mint-300">@_orderNumber</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-lavender-300">Total</span>
+                    <span class="font-extrabold text-lavender-100">@_orderTotal.ToMoney()</span>
+                </div>
+            </div>
+
+            <p class="mt-5 text-xs text-lavender-300">This is a demo order. Nothing was charged and nothing will arrive.</p>
+
+            <a href="/shop"
+               class="mt-8 inline-block rounded-full bg-blush-400 px-8 py-3 font-extrabold text-plum-950 shadow-glow transition hover:bg-blush-300">
+                Keep browsing
+            </a>
+        </div>
+    }
+    else if (Cart.State.IsEmpty)
+    {
+        <div class="rounded-3xl border border-white/10 bg-plum-800 px-6 py-14 text-center shadow-2xl">
+            <p class="text-6xl" aria-hidden="true">🦇</p>
+            <h1 class="mt-4 font-display text-2xl font-semibold text-lavender-100">Nothing to check out yet</h1>
+            <p class="mt-2 text-lavender-300">Add a plushie to your cart first.</p>
+            <a href="/shop" class="mt-6 inline-block rounded-full bg-blush-400 px-6 py-3 font-extrabold text-plum-950 shadow-glow transition hover:bg-blush-300">
+                Back to shop
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="overflow-hidden rounded-3xl border border-white/10 bg-plum-800 shadow-2xl">
+            <div class="grid md:grid-cols-5">
+                <div class="p-6 sm:p-8 md:col-span-3">
+                    <h1 class="font-display text-2xl font-semibold text-lavender-100">Where should we haunt?</h1>
+                    <p class="mt-1 text-sm text-lavender-300">Dummy details are fine. They stay in this browser tab and go nowhere.</p>
+
+                    <EditForm Model="_model" OnValidSubmit="SubmitAsync" class="mt-6 space-y-4" novalidate>
+                        <DataAnnotationsValidator />
+
+                        <div>
+                            <label for="co-name" class="mb-1 block text-xs font-bold uppercase tracking-wide text-lavender-300">Full name</label>
+                            <InputText id="co-name" @bind-Value="_model.FullName" autocomplete="name" class="@InputClass" placeholder="Wednesday Addams" />
+                            <ValidationMessage For="() => _model.FullName" />
+                        </div>
+
+                        <div>
+                            <label for="co-email" class="mb-1 block text-xs font-bold uppercase tracking-wide text-lavender-300">Email</label>
+                            <InputText id="co-email" @bind-Value="_model.Email" type="email" autocomplete="email" class="@InputClass" placeholder="boo@example.com" />
+                            <ValidationMessage For="() => _model.Email" />
+                        </div>
+
+                        <div>
+                            <label for="co-address" class="mb-1 block text-xs font-bold uppercase tracking-wide text-lavender-300">Address</label>
+                            <InputText id="co-address" @bind-Value="_model.Address" autocomplete="street-address" class="@InputClass" placeholder="13 Cobweb Lane" />
+                            <ValidationMessage For="() => _model.Address" />
+                        </div>
+
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label for="co-city" class="mb-1 block text-xs font-bold uppercase tracking-wide text-lavender-300">City</label>
+                                <InputText id="co-city" @bind-Value="_model.City" autocomplete="address-level2" class="@InputClass" />
+                                <ValidationMessage For="() => _model.City" />
+                            </div>
+                            <div>
+                                <label for="co-postal" class="mb-1 block text-xs font-bold uppercase tracking-wide text-lavender-300">Postal code</label>
+                                <InputText id="co-postal" @bind-Value="_model.PostalCode" autocomplete="postal-code" class="@InputClass" />
+                                <ValidationMessage For="() => _model.PostalCode" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="co-country" class="mb-1 block text-xs font-bold uppercase tracking-wide text-lavender-300">Country</label>
+                            <InputSelect id="co-country" @bind-Value="_model.Country" autocomplete="country-name" class="@InputClass">
+                                <option value="">Choose a country…</option>
+                                @foreach (var country in Countries)
+                                {
+                                    <option value="@country">@country</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="() => _model.Country" />
+                        </div>
+
+                        <div>
+                            <label for="co-note" class="mb-1 block text-xs font-bold uppercase tracking-wide text-lavender-300">Gift note <span class="font-normal normal-case">(optional)</span></label>
+                            <InputText id="co-note" @bind-Value="_model.GiftNote" class="@InputClass" placeholder="Happy un-birthday!" />
+                            <ValidationMessage For="() => _model.GiftNote" />
+                        </div>
+
+                        <button type="submit"
+                                disabled="@_processing"
+                                class="w-full rounded-full bg-blush-400 py-3 text-base font-extrabold text-plum-950 shadow-glow transition hover:bg-blush-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-mint-300 disabled:cursor-wait disabled:bg-plum-600 disabled:text-lavender-300 disabled:shadow-none">
+                            @(_processing ? "Stitching your order…" : $"Place spooky order · {Cart.State.GrandTotal.ToMoney()}")
+                        </button>
+                    </EditForm>
+                </div>
+
+                <aside class="border-t border-white/10 bg-plum-900/60 p-6 sm:p-8 md:col-span-2 md:border-l md:border-t-0" aria-label="Order summary">
+                    <h2 class="font-display text-lg font-semibold text-lavender-100">Order summary</h2>
+                    <ul class="mt-4 space-y-3">
+                        @foreach (var item in Cart.State.Items)
+                        {
+                            <li @key="item.Product.Id" class="flex items-center gap-3">
+                                <img src="@item.Product.ImageUrl" alt="" class="h-12 w-12 flex-none rounded-lg object-cover" />
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-bold text-lavender-100">@item.Product.Name</p>
+                                    <p class="text-xs text-lavender-300">Qty @item.Quantity</p>
+                                </div>
+                                <p class="text-sm font-bold text-mint-300">@item.TotalPrice.ToMoney()</p>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="mt-5 space-y-2 border-t border-white/10 pt-4 text-sm">
+                        <div class="flex justify-between text-lavender-300">
+                            <span>Items</span>
+                            <span>@Cart.State.TotalItemCount</span>
+                        </div>
+                        <div class="flex justify-between text-lavender-300">
+                            <span>Shipping</span>
+                            <span class="font-bold text-mint-300">Free</span>
+                        </div>
+                        <div class="flex items-end justify-between pt-1">
+                            <span class="text-lavender-200">Grand total</span>
+                            <span class="font-display text-2xl font-semibold text-lavender-100">@Cart.State.GrandTotal.ToMoney()</span>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private const string InputClass =
+        "w-full rounded-xl border border-white/10 bg-plum-900 px-4 py-2.5 text-sm text-lavender-100 placeholder-lavender-400/50 " +
+        "focus:border-blush-300 focus:outline-none focus:ring-2 focus:ring-blush-300/40";
+
+    private static readonly string[] Countries =
+    {
+        "Philippines", "Singapore", "United States", "United Kingdom", "Canada", "Australia", "Japan", "Other"
+    };
+
+    private CheckoutDetails _model = new();
+    private bool _processing;
+    private bool _success;
+
+    private string _customerName = string.Empty;
+    private string _orderNumber = string.Empty;
+    private decimal _orderTotal;
+    private int _orderCount;
+
+    protected override void OnInitialized() => Cart.OnChange += Refresh;
+    private void Refresh() => InvokeAsync(StateHasChanged);
+
+    private async Task SubmitAsync()
+    {
+        if (_processing || Cart.State.IsEmpty) return;
+        _processing = true;
+
+        _customerName = _model.FullName.Trim().Split(' ')[0];
+        _orderTotal = Cart.State.GrandTotal;
+        _orderCount = Cart.State.TotalItemCount;
+
+        await Task.Delay(1200);
+
+        _orderNumber = $"BOO-{Random.Shared.Next(100000, 999999)}";
+
+        _success = true;
+        _processing = false;
+        await Cart.ClearAsync();
+    }
+
+    public void Dispose() => Cart.OnChange -= Refresh;
+}

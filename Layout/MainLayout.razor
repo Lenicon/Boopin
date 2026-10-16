@@ -1,7 +1,6 @@
 @inherits LayoutComponentBase
 @implements IDisposable
 @inject ICartService Cart
-@inject UiState Ui
 
 <div class="flex min-h-screen flex-col">
     <header class="sticky top-0 z-40 border-b border-white/10 bg-plum-950/80 backdrop-blur-md">
@@ -12,14 +11,13 @@
             </a>
 
             <nav class="hidden items-center gap-8 text-sm font-bold text-lavender-200 sm:flex" aria-label="Main">
-                <a href="/#featured" class="transition hover:text-blush-300">Featured</a>
-                <a href="/#shop" class="transition hover:text-blush-300">Shop</a>
+                <a href="/" class="transition hover:text-blush-300">Home</a>
+                <a href="/shop" class="transition hover:text-blush-300">Shop</a>
             </nav>
 
-            <button type="button"
-                    @onclick="Ui.OpenCart"
-                    aria-label="Open cart, @Cart.State.TotalItemCount items"
-                    class="relative flex items-center gap-2 rounded-full bg-plum-700 px-4 py-2 text-sm font-bold text-lavender-100 transition hover:bg-plum-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blush-300">
+            <a href="/cart"
+               aria-label="View cart, @Cart.State.TotalItemCount items"
+               class="relative flex items-center gap-2 rounded-full bg-plum-700 px-4 py-2 text-sm font-bold text-lavender-100 transition hover:bg-plum-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blush-300">
                 <span aria-hidden="true">🛒</span>
                 <span>Cart</span>
                 @if (Cart.State.TotalItemCount > 0)
@@ -28,7 +26,7 @@
                         @Cart.State.TotalItemCount
                     </span>
                 }
-            </button>
+            </a>
         </div>
     </header>
 
@@ -44,15 +42,12 @@
     </footer>
 </div>
 
-<CartDrawer />
-<CheckoutModal />
 <ToastHost />
 
 @code {
     protected override async Task OnInitializedAsync()
     {
         Cart.OnChange += Refresh;
-        Ui.OnChange += Refresh;
         await Cart.InitializeAsync();
     }
 
@@ -61,6 +56,5 @@
     public void Dispose()
     {
         Cart.OnChange -= Refresh;
-        Ui.OnChange -= Refresh;
     }
 }

@@ -1,6 +1,5 @@
 @page "/"
 @inject IProductService Products
-@inject UiState Ui
 
 <PageTitle>Boopin · Spooky-cute plushies</PageTitle>
 
@@ -30,15 +29,14 @@
             </p>
 
             <div class="mt-8 flex flex-wrap gap-3">
-                <a href="/#shop"
+                <a href="/shop"
                    class="rounded-full bg-blush-400 px-7 py-3 font-extrabold text-plum-950 shadow-glow transition hover:bg-blush-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-mint-300">
                     Shop plushies
                 </a>
-                <button type="button"
-                        @onclick="Ui.OpenCart"
-                        class="rounded-full border border-lavender-300/40 px-7 py-3 font-extrabold text-lavender-100 transition hover:border-mint-300 hover:text-mint-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-mint-300">
+                <a href="/cart"
+                   class="rounded-full border border-lavender-300/40 px-7 py-3 font-extrabold text-lavender-100 transition hover:border-mint-300 hover:text-mint-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-mint-300">
                     View cart
-                </button>
+                </a>
             </div>
 
             <ul class="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm font-bold text-lavender-300">
@@ -67,7 +65,7 @@
 </section>
 
 @* ───────── Featured ───────── *@
-<section id="featured" class="mx-auto max-w-6xl scroll-mt-24 px-4 py-14 sm:px-6">
+<section id="featured" class="mx-auto max-w-6xl px-4 py-14 sm:px-6">
     <div class="mb-8 flex items-end justify-between gap-4">
         <div>
             <p class="text-sm font-extrabold uppercase tracking-widest text-blush-300">Coven favourites</p>
@@ -81,6 +79,14 @@
             <ProductCard @key="product.Id" Product="product" />
         }
     </div>
+
+    @* See More Button linking to the Shop page *@
+    <div class="mt-12 text-center">
+        <a href="/shop" 
+           class="inline-block rounded-full border border-blush-300/50 bg-plum-800 px-8 py-4 text-base font-extrabold text-lavender-100 shadow-soft transition hover:bg-blush-400 hover:text-plum-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-mint-300">
+            See more plushies in the shop →
+        </a>
+    </div>
 </section>
 
 @* ───────── Promo banner ───────── *@
@@ -93,7 +99,7 @@
                 <h2 class="mt-1 font-display text-3xl font-semibold sm:text-4xl">Free spooky shipping on every parcel</h2>
                 <p class="mt-2 max-w-xl font-semibold text-plum-800">Adopt one friend or the whole graveyard. Delivery costs nothing, all week long.</p>
             </div>
-            <a href="/#shop"
+            <a href="/shop"
                class="flex-none rounded-full bg-plum-950 px-7 py-3 font-extrabold text-lavender-100 transition hover:bg-plum-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-plum-950 focus-visible:ring-offset-2 focus-visible:ring-offset-blush-300">
                 Adopt a friend
             </a>
@@ -101,68 +107,11 @@
     </div>
 </section>
 
-@* ───────── Shop ───────── *@
-<section id="shop" class="mx-auto max-w-6xl scroll-mt-24 px-4 py-14 sm:px-6">
-    <div class="mb-6">
-        <p class="text-sm font-extrabold uppercase tracking-widest text-mint-300">The whole graveyard</p>
-        <h2 class="font-display text-3xl font-semibold text-lavender-100 sm:text-4xl">Shop all plushies</h2>
-    </div>
-
-    <div class="mb-8 flex flex-wrap gap-2" role="group" aria-label="Filter by category">
-        <button type="button"
-                @onclick="() => _selected = null"
-                aria-pressed="@(_selected is null ? "true" : "false")"
-                class="@ChipClass(_selected is null)">
-            ✨ All <span class="opacity-70">(@_all.Count)</span>
-        </button>
-
-        @foreach (var category in Enum.GetValues<ProductCategory>())
-        {
-            var current = category;
-            var active = _selected == current;
-            <button type="button"
-                    @key="current"
-                    @onclick="() => _selected = current"
-                    aria-pressed="@(active ? "true" : "false")"
-                    class="@ChipClass(active)">
-                @current.ToEmoji() @current.ToDisplayName()
-                <span class="opacity-70">(@_all.Count(p => p.Category == current))</span>
-            </button>
-        }
-    </div>
-
-    @if (!Visible.Any())
-    {
-        <p class="rounded-2xl bg-plum-800/60 p-8 text-center text-lavender-300">No plushies lurking in this category yet.</p>
-    }
-    else
-    {
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            @foreach (var product in Visible)
-            {
-                <ProductCard @key="product.Id" Product="product" />
-            }
-        </div>
-    }
-</section>
-
 @code {
-    private IReadOnlyList<Product> _all = Array.Empty<Product>();
     private IReadOnlyList<Product> _featured = Array.Empty<Product>();
-    private ProductCategory? _selected;
-
-    private IEnumerable<Product> Visible =>
-        _selected is null ? _all : _all.Where(p => p.Category == _selected);
 
     protected override async Task OnInitializedAsync()
     {
-        _all = await Products.GetAllAsync();
         _featured = await Products.GetFeaturedAsync();
     }
-
-    private static string ChipClass(bool active) =>
-        "rounded-full px-5 py-2 text-sm font-extrabold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-mint-300 " +
-        (active
-            ? "bg-blush-400 text-plum-950 shadow-glow"
-            : "bg-plum-700 text-lavender-200 hover:bg-plum-600");
 }

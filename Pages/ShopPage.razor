@@ -1,0 +1,67 @@
+@page "/shop"
+@inject IProductService Products
+
+<PageTitle>Shop All Plushies · Boopin</PageTitle>
+
+<section class="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+    <div class="mb-6">
+        <p class="text-sm font-extrabold uppercase tracking-widest text-mint-300">The whole graveyard</p>
+        <h2 class="font-display text-3xl font-semibold text-lavender-100 sm:text-4xl">Shop all plushies</h2>
+    </div>
+
+    <div class="mb-8 flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+        <button type="button"
+                @onclick="() => _selected = null"
+                aria-pressed="@(_selected is null ? "true" : "false")"
+                class="@ChipClass(_selected is null)">
+            ✨ All <span class="opacity-70">(@_all.Count)</span>
+        </button>
+
+        @foreach (var category in Enum.GetValues<ProductCategory>())
+        {
+            var current = category;
+            var active = _selected == current;
+            <button type="button"
+                    @key="current"
+                    @onclick="() => _selected = current"
+                    aria-pressed="@(active ? "true" : "false")"
+                    class="@ChipClass(active)">
+                @current.ToEmoji() @current.ToDisplayName()
+                <span class="opacity-70">(@_all.Count(p => p.Category == current))</span>
+            </button>
+        }
+    </div>
+
+    @if (!Visible.Any())
+    {
+        <p class="rounded-2xl bg-plum-800/60 p-8 text-center text-lavender-300">No plushies lurking in this category yet.</p>
+    }
+    else
+    {
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach (var product in Visible)
+            {
+                <ProductCard @key="product.Id" Product="product" />
+            }
+        </div>
+    }
+</section>
+
+@code {
+    private IReadOnlyList<Product> _all = Array.Empty<Product>();
+    private ProductCategory? _selected;
+
+    private IEnumerable<Product> Visible =>
+        _selected is null ? _all : _all.Where(p => p.Category == _selected);
+
+    protected override async Task OnInitializedAsync()
+    {
+        _all = await Products.GetAllAsync();
+    }
+
+    private static string ChipClass(bool active) =>
+        "rounded-full px-5 py-2 text-sm font-extrabold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-mint-300 " +
+        (active
+            ? "bg-blush-400 text-plum-950 shadow-glow"
+            : "bg-plum-700 text-lavender-200 hover:bg-plum-600");
+}
